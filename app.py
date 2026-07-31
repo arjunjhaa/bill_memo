@@ -6,8 +6,8 @@ from PIL import Image, ImageDraw, ImageFont
 # -----------------------------
 # SETTINGS
 # -----------------------------
-TEMPLATE = "billmemo.jpg"   # must be in the same folder / repo as this file
-FONT_PATH = "arial.ttf"     # bundle a .ttf in the repo so it works on any server
+TEMPLATE = "billmemo.jpg"          # must be in the same folder / repo as this file
+FONT_PATH = "DejaVuSans-Bold.ttf"  # bundled in the repo so it works on any server (Arial isn't installed on Linux servers)
 
 st.set_page_config(page_title="Tempo Bill Generator", page_icon="🧾", layout="centered")
 st.title("🧾 Raghav Tempo Service Bill Generator")
@@ -18,6 +18,7 @@ st.title("🧾 Raghav Tempo Service Bill Generator")
 invoice = st.text_input("Invoice Number").strip()
 date = st.text_input("Date").strip()
 customer = st.text_input("Customer Name").strip()
+font_size = st.slider("Text size", min_value=10, max_value=80, value=24)
 
 generate = st.button("Generate Bill", type="primary")
 
@@ -35,10 +36,15 @@ if generate:
     img = Image.open(TEMPLATE).convert("RGB")
     draw = ImageDraw.Draw(img)
 
-    try:
-        font = ImageFont.truetype(FONT_PATH, 24)
-    except Exception:
+    if not os.path.exists(FONT_PATH):
+        st.error(
+            f"Font file '{FONT_PATH}' not found in the repo. "
+            "Text will render tiny using a fallback font until you add it. "
+            "Upload a .ttf file (e.g. DejaVuSans-Bold.ttf) alongside app.py."
+        )
         font = ImageFont.load_default()
+    else:
+        font = ImageFont.truetype(FONT_PATH, font_size)
 
     # Hardcoded positions (same as your original script)
     if invoice:
